@@ -6,11 +6,15 @@ import com.snd.storefinder.dtos.product.StoreProductInfo;
 import com.snd.storefinder.enums.UserRole;
 import com.snd.storefinder.models.User;
 import com.snd.storefinder.models.store.StoreManagerId;
+import com.snd.storefinder.models.store.StoreProduct;
 import com.snd.storefinder.services.StoreService;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/store")
@@ -29,33 +33,70 @@ public class StoreController {
     }
 
     @PutMapping("/manager")
-    public ResponseEntity<StoreManagerId> addStoreManager(Integer storeId, Integer managerId,
-                                                          UserRole userRole,
+    public ResponseEntity<StoreManagerId> addStoreManager(@RequestParam Integer store,
+                                                          @RequestParam Integer manager,
+                                                          @RequestParam UserRole role,
                                                           @AuthenticationPrincipal User user) {
-        return new ResponseEntity<>(storeService.addStoreAdmin(storeId, managerId, userRole, user), HttpStatus.OK);
+        return new ResponseEntity<>(storeService.addStoreAdmin(store, manager, role, user), HttpStatus.OK);
     }
 
     @DeleteMapping("/manager")
-    public ResponseEntity<Void> deleteStoreManager(Integer storeId, Integer managerId,
+    public ResponseEntity<Void> deleteStoreManager(@RequestParam Integer store,
+                                                   @RequestParam Integer manager,
                                                    @AuthenticationPrincipal User user) {
-        storeService.removeStoreAdmin(storeId, managerId, user);
+        storeService.removeStoreAdmin(store, manager, user);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @PostMapping("/product")
-    public ResponseEntity<StoreProductInfo> addProductToStore(@RequestParam Integer productId,
-                                                              @RequestParam Integer storeId,
+    public ResponseEntity<StoreProductInfo> addProductToStore(@RequestParam Integer product,
+                                                              @RequestParam Integer store,
                                                               @AuthenticationPrincipal User user) {
-        return new ResponseEntity<>(storeService.addProductToStore(productId, storeId, user), HttpStatus.OK);
+        return new ResponseEntity<>(storeService.addProductToStore(product, store, user), HttpStatus.OK);
+    }
+
+    @PatchMapping("product/stock")
+    public ResponseEntity<StoreProductInfo> updateProductStockInStore(@RequestParam Integer product,
+                                                                 @RequestParam Integer store,
+                                                                 @RequestParam Integer stock,
+                                                                 @AuthenticationPrincipal User user) {
+       StoreProductInfo info = storeService.updateProductStock(product, store, stock, user);
+       return new ResponseEntity<>(info, HttpStatus.OK);
+    }
+
+
+    @PatchMapping("/product/price")
+    public ResponseEntity<StoreProductInfo> updateProductPriceInStore(@RequestParam Integer product,
+                                                                      @RequestParam Integer store,
+                                                                      @RequestParam Double price,
+                                                                      @AuthenticationPrincipal User user) {
+        StoreProductInfo info = storeService.updateProductPrice(product, store, price, user);
+        return new ResponseEntity<>(info, HttpStatus.OK);
+    }
+
+    @DeleteMapping("/product")
+    public ResponseEntity<Void> deleteProductFromStore(@RequestParam Integer product,
+                                                       @RequestParam Integer store,
+                                                       @AuthenticationPrincipal User user) {
+        storeService.removeProductFromStore(product, store, user);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @GetMapping("/product")
-    public ResponseEntity<StoreProductInfo> getProductsFromStore(@RequestParam Integer productId,
-                                                                 @RequestParam Integer storeId,
+    public ResponseEntity<StoreProductInfo> getProductsFromStore(@RequestParam Integer product,
+                                                                 @RequestParam Integer store,
                                                                  @AuthenticationPrincipal User user) {
-        return ResponseEntity.ok(storeService.getStoreProductInfo(storeId, productId, user));
+        return ResponseEntity.ok(storeService.getStoreProductInfo(store, product, user));
     }
 
-
+    @GetMapping("{id}/products")
+    public ResponseEntity<List<StoreProductInfo>> getAllProductsFromStore(@PathVariable("id") Integer id,
+                                                                          @RequestParam("size") Integer size,
+                                                                          @RequestParam("page") Integer page,
+                                                                          @AuthenticationPrincipal User user) {
+        PageRequest pageRequest = PageRequest.of(page, size);
+        List<StoreProductInfo> list = storeService.getAllProductsOfStore(id, user, pageRequest);
+        return ResponseEntity.ok(list);
+    }
 
 }

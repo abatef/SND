@@ -7,11 +7,8 @@ import com.snd.storefinder.exceptions.InvalidProductIdException;
 import com.snd.storefinder.models.store.Product;
 import com.snd.storefinder.repositories.ProductRepository;
 import com.snd.storefinder.repositories.StoreProductRepository;
-import org.hibernate.query.Page;
 import org.modelmapper.ModelMapper;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,14 +20,16 @@ public class ProductService {
     private final StoreProductRepository storeProductRepository;
     private final ModelMapper modelMapper;
 
-    public ProductService(ProductRepository productRepository, StoreProductRepository storeProductRepository, ModelMapper modelMapper) {
+    public ProductService(ProductRepository productRepository,
+                          StoreProductRepository storeProductRepository,
+                          ModelMapper modelMapper) {
         this.productRepository = productRepository;
         this.storeProductRepository = storeProductRepository;
         this.modelMapper = modelMapper;
     }
 
     @Transactional
-    public ProductInfoResponse createNewRepository(ProductCreationRequest request) {
+    public ProductInfoResponse createNewProduct(ProductCreationRequest request) {
         ModelMapper modelMapper = new ModelMapper();
         Product product = modelMapper.map(request, Product.class);
         product = productRepository.save(product);
@@ -47,13 +46,19 @@ public class ProductService {
     }
 
     public Product getProductById(Integer id) {
-        return productRepository.findById(id).orElseThrow(() -> new InvalidProductIdException(id.toString()));
+        return productRepository.findById(id).
+                orElseThrow(() -> new InvalidProductIdException(id.toString()));
+    }
+
+    public ProductInfoResponse getProductInfoById(Integer id) {
+        return modelMapper.map(getProductById(id), ProductInfoResponse.class);
     }
 
     public List<StoreProductInfo> findAllStoreContainingProduct(Integer productId, Pageable pageable) {
         return storeProductRepository.findStoreProductsByProduct_Id(productId,pageable)
                 .stream()
-                .map(storeProduct -> {return modelMapper.map(storeProduct, StoreProductInfo.class);})
+                .map(storeProduct ->
+                    { return modelMapper.map(storeProduct, StoreProductInfo.class);})
                 .toList();
     }
 

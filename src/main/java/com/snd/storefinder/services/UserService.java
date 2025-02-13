@@ -39,7 +39,7 @@ public class UserService {
             throw new EmailAlreadyUsedException(request.getEmail());
         }
         User user = modelMapper.map(request, User.class);
-        user = userRepository.save(user);
+        userRepository.save(user);
         user.setWishlistId(wishlistService.createWishlist(user));
         return modelMapper.map(user, UserInfoResponse.class);
     }

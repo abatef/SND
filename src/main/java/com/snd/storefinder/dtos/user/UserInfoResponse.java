@@ -24,17 +24,4 @@ public class UserInfoResponse {
     private Integer wishlistId;
     private Instant createdAt;
     private Instant updatedAt;
-
-    public User toEntity() {
-        User user = new User();
-        user.setId(id);
-        user.setName(name);
-        user.setEmail(email);
-        user.setPhone(phone);
-        user.setAddress(address);
-        user.setLocation(location.toPoint());
-        user.setPreferences(preferences);
-        user.setWishlistId(wishlistId);
-        return user;
-    }
 }
