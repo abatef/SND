@@ -19,13 +19,15 @@ public class ProductService {
     private final ProductRepository productRepository;
     private final StoreProductRepository storeProductRepository;
     private final ModelMapper modelMapper;
+    private final SearchService searchService;
 
     public ProductService(ProductRepository productRepository,
                           StoreProductRepository storeProductRepository,
-                          ModelMapper modelMapper) {
+                          ModelMapper modelMapper, SearchService searchService) {
         this.productRepository = productRepository;
         this.storeProductRepository = storeProductRepository;
         this.modelMapper = modelMapper;
+        this.searchService = searchService;
     }
 
     @Transactional
@@ -33,6 +35,7 @@ public class ProductService {
         ModelMapper modelMapper = new ModelMapper();
         Product product = modelMapper.map(request, Product.class);
         product = productRepository.save(product);
+        searchService.saveProduct(product);
         return modelMapper.map(product, ProductInfoResponse.class);
     }
 

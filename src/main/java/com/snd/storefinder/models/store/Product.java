@@ -7,6 +7,9 @@ import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.data.elasticsearch.annotations.Document;
+import org.springframework.data.elasticsearch.annotations.Field;
+import org.springframework.data.elasticsearch.annotations.FieldType;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -17,6 +20,7 @@ import java.util.Set;
 @Setter
 @Entity
 @Table(name = "products")
+@Document(indexName = "products")
 public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "products_id_gen")
@@ -25,12 +29,15 @@ public class Product {
     private Integer id;
 
     @Column(name = "name", nullable = false, length = 100)
+    @Field(type = FieldType.Keyword)
     private String name;
 
     @Column(name = "category", length = 50)
+    @Field(type = FieldType.Keyword)
     private String category;
 
     @Column(name = "description", length = Integer.MAX_VALUE)
+    @Field(type = FieldType.Keyword)
     private String description;
 
     @Column(name = "image_url")
